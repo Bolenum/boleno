@@ -16,12 +16,12 @@ contract boleno {
     event Approval(address indexed _owner, address indexed _spender, uint _value);
 
     mapping (address => uint256) public balances;           // Balances
-    mapping(address => mapping (address => uint256)) allowed;// Records of allowances
+    mapping(address => mapping (address => uint256)) allowed;// Record of allowances
 
     // Initialization
     function boleno() {
       supplier = msg.sender;                                // Supplier is contract creator
-      balances[supplier] = totalSupply;                     // The initial supply goes to su[pplier
+      balances[supplier] = totalSupply;                     // The initial supply goes to supplier
     }
 
     // For functions that require only supplier usage
@@ -35,7 +35,7 @@ contract boleno {
       if (now < 1502755200 && msg.sender != supplier) throw;// Cannot trade until Tuesday, August 15, 2017 12:00:00 AM (End of ICO)
       if (balances[msg.sender] < _value) throw;            // Does the spender have enough Bolenos to send?
       if (balances[_to] + _value < balances[_to]) throw;   // Overflow?
-      balances[msg.sender] -= _value;                      // Subtract the Bolenos the sender's balance
+      balances[msg.sender] -= _value;                      // Subtract the Bolenos from the sender's balance
       balances[_to] += _value;                             // Add the Bolenos to the recipient's balance
       Transfer(msg.sender, _to, _value);                   // Send Bolenos transfer event
       return true;                                         // Return true to client
@@ -43,29 +43,29 @@ contract boleno {
 
     // Token transfer on your behalf (i.e. by contracts)
     function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
-      if (now < 1502755200 && _from != supplier) throw;// Cannot trade until Tuesday, August 15, 2017 12:00:00 AM (End of ICO)
+      if (now < 1502755200 && _from != supplier) throw;     // Cannot trade until Tuesday, August 15, 2017 12:00:00 AM (End of ICO)
       if (balances[_from] < _value) throw;                  // Does the spender have enough Bolenos to send?
       if(allowed[_from][msg.sender] < _value) throw;        // Is the sender allowed to spend as much money on behalf of the spender?
       if (balances[_to] + _value < balances[_to]) throw;    // Overflow?
-      balances[_from] -= _value;                            // Subtract the Bolenos the sender's balance
-      allowed[_from][msg.sender] -= _value;                 // Update allowances records
+      balances[_from] -= _value;                            // Subtract the Bolenos from the sender's balance
+      allowed[_from][msg.sender] -= _value;                 // Update allowances record
       balances[_to] += _value;                              // Add the Bolenos to the recipient's balance
       Transfer(_from, _to, _value);                         // Send Bolenos transfer event
       return true;                                          // Return true to client
      }
 
      // Allows someone (i.e a contract) to spend on your behalf multiple times up to a certain value.
-     // If this function is called again it overwrites the current allowance with _value.
+     // If this function is called again, it overwrites the current allowance with _value.
      // Approve 0 to cancel previous approval
      function approve(address _spender, uint256 _value) returns (bool success) {
-       allowed[msg.sender][_spender] = _value;             // Update allowances records
+       allowed[msg.sender][_spender] = _value;             // Update allowances record
        Approval(msg.sender, _spender, _value);             // Send approval event
        return true;                                        // Return true to client
      }
 
      // Check how much someone approved you to spend on their behalf
      function allowance(address _owner, address _spender) returns (uint256 bolenos) {
-       return allowed[_owner][_spender];                   // Check the allowed map for records
+       return allowed[_owner][_spender];                   // Check the allowances record
      }
 
     // What is the Boleno balance of a particular person?
@@ -89,16 +89,16 @@ contract boleno {
       uint256 purchaserBounty = (bolenos / 100) * (100 + bounty);// Add bounty to the purchased amount
       if(balances[supplier] < purchaserBounty) throw;       // Does the supplier have enough BLN tokens to sell?
       if (balances[msg.sender] + purchaserBounty < balances[msg.sender]) throw; // Overflow?
-      balances[supplier] -= purchaserBounty;                // Subtract the Bolenos the supplier's balance
+      balances[supplier] -= purchaserBounty;                // Subtract the Bolenos from the supplier's balance
       balances[msg.sender] += purchaserBounty;              // Add the Bolenos to the buyer's balance
       Transfer(supplier, msg.sender, purchaserBounty);      // Send Bolenos transfer event
       /*
         Then give Bolenos to the referrer
       */
-      uint256 referrerBounty = (bolenos / 100) * bounty;    // Only the bounty percentage to the referrer
+      uint256 referrerBounty = (bolenos / 100) * bounty;    // Only the bounty percentage is added to the referrer
       if(balances[supplier] < referrerBounty) throw;        // Does the supplier have enough BLN tokens to sell?
       if (balances[referrer] + referrerBounty < balances[referrer]) throw; // Overflow?
-      balances[supplier] -= referrerBounty;                 // Subtract the Bolenos the supplier's balance
+      balances[supplier] -= referrerBounty;                 // Subtract the Bolenos from the supplier's balance
       balances[referrer] += referrerBounty;                 // Add the Bolenos to the buyer's balance
       Transfer(supplier, referrer, referrerBounty);         // Send Bolenos transfer event
     }
@@ -121,14 +121,16 @@ contract boleno {
     // Transfer both supplier status and all held Boleno tokens supply to a different address (only supplier)
     function transferSupply(address newSupplier) onlySupplier {
       if (balances[newSupplier] + balances[supplier] < balances[newSupplier]) throw;// Overflow?
-      balances[newSupplier] += balances[supplier];          // Add supply to new supplier
-      balances[supplier] = 0;                               // Substract supply from old supplier
+      uint256 supplyValue = balances[supplier];             // Determine current value of the supply
+      balances[newSupplier] += supplyValue;                 // Add supply to new supplier
+      balances[supplier] -= supplyValue;                    // Substract supply from old supplier
+      Transfer(supplier, newSupplier, supplyValue);         // Send Bolenos transfer event
       supplier = newSupplier;                               // Transfer supplier status
     }
 
     // Claim sale Ethers. Can be executed by anyone.
     function claimSale(){
-      address dao = 0x123;                                  // Hardcoded address of the Bolenum DAO
+      address dao = 0x123;                                  // Hardcoded address of the Bolenum private DAO
       dao.transfer(this.balance);                           // Send all collected Ethers to the address
     }
 
