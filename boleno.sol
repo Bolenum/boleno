@@ -121,8 +121,8 @@ contract boleno {
     // Transfer both supplier status and all held Boleno tokens supply to a different address (only supplier)
     function transferSupply(address newSupplier) onlySupplier {
       if (balances[newSupplier] + balances[supplier] < balances[newSupplier]) throw;// Overflow?
-      balances[supplier] = 0;                               // Substract supply from old supplier
       balances[newSupplier] += balances[supplier];          // Add supply to new supplier
+      balances[supplier] = 0;                               // Substract supply from old supplier
       supplier = newSupplier;                               // Transfer supplier status
     }
 
