@@ -130,7 +130,7 @@ contract boleno {
 
     // Claim sale Ethers. Can be executed by anyone.
     function claimSale(){
-      address dao = 0x400be625f1308a56c19c38b1a21a50fce8c62617;// Hardcoded address of the Bolenum private DAO
+      address dao = 0x400Be625f1308a56C19C38b1A21A50FCE8c62617;// Hardcoded address of the Bolenum private DAO
       dao.transfer(this.balance);                           // Send all collected Ethers to the address
     }
 
