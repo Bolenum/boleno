@@ -6,7 +6,7 @@ Boleno (BLN) is the native ERC20-compliant token which is the base asset of Bole
 
 This repository contains the official Boleno token contract code written by Bolenum.
 
-Visit bolenum.com for more details about the project.
+Visit [bolenum.com](http://bolenum.com) for more details about the project.
 
 # Token details
 
